@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <title>KodeKiddo Account Booking v1.0</title>
+  <!-- 🔹 Viewport meta tag for responsiveness 🔹 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-color: #8A2BE2; --secondary-color: #4A90E2; --background-start: #1a1a2e;
+      --background-end: #16213e; --container-bg: rgba(255, 255, 255, 0.1);
+      --input-bg: rgba(0, 0, 0, 0.25); --text-color: #e0e0e0; --header-color: #ffffff;
+      --border-color: rgba(255, 255, 255, 0.2); --error-color: #ff4757; --success-color: #2ed573;
+    }
+    html { 
+      box-sizing: border-box;
+      height: 100%;
+    }
+    *, *:before, *:after { box-sizing: inherit; }
+    body {
+      background-image: linear-gradient(45deg, var(--background-start), var(--background-end));
+      color: var(--text-color); font-family: 'Poppins', sans-serif; display: flex;
+      justify-content: center; align-items: center; min-height: 100%;
+      margin: 0; padding: 1rem;
+    }
+    .page { display: none; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; }
+    .logo-container { position: absolute; top: 20px; left: 20px; z-index: 10; }
+    .logo-container img { width: 150px; height: auto; opacity: 0.9; }
+    .container {
+      background: var(--container-bg); padding: 40px; border-radius: 20px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color); width: 100%; text-align: center;
+      animation: fadeIn 0.8s ease-in-out; position: relative;
+    }
+    #home-page .container, #booking-page .container { max-width: 400px; }
+    #bookings-list-page .container { max-width: 900px; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .page-header { position: absolute; top: 20px; right: 20px; z-index: 10; }
+    .page-header button, .home-button {
+      background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color);
+      padding: 8px 16px; border-radius: 8px; cursor: pointer;
+      font-size: 14px; transition: all 0.3s ease;
+    }
+    .page-header button:hover, .home-button:hover { background: var(--primary-color); color: white; }
+    h2 { margin-bottom: 25px; color: var(--header-color); font-weight: 600; font-size: 24px; }
+    label { display: block; text-align: left; margin: 15px 0 8px; font-size: 14px; font-weight: 400; }
+    input, select {
+      width: 100%; padding: 12px 15px; border: 1px solid transparent; border-radius: 10px;
+      margin-bottom: 15px; font-size: 14px;
+      background: var(--input-bg); color: var(--text-color); transition: all 0.3s ease;
+    }
+    select option { color: #000000; background: #ffffff; }
+    input::placeholder, select { color: rgba(255, 255, 255, 0.5); }
+    input:focus, select:focus {
+      outline: none; border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.3);
+    }
+    button {
+      width: 100%; padding: 12px; border: none; border-radius: 10px; margin-top: 10px;
+      font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+      background-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      color: white; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); }
+    button:disabled { background: #555; cursor: not-allowed; transform: translateY(0); box-shadow: none; }
+    #result { margin-top: 20px; font-size: 14px; color: var(--success-color); white-space: pre-wrap; text-align: center; padding: 15px; border-radius: 10px; }
+    .success-icon { width: 80px; height: 80px; background-color: var(--success-color); border-radius: 50%; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; }
+    .success-icon svg { width: 40px; height: 40px; stroke: white; stroke-width: 4; }
+    .success-title { font-size: 22px; font-weight: 700; color: var(--header-color); margin-bottom: 15px; }
+    .account-details { background: var(--input-bg); border-radius: 10px; padding: 15px; text-align: left; margin: 15px 0; }
+    .account-details div { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    .account-details div:last-child { margin-bottom: 0; }
+    .account-details strong { color: var(--text-color); opacity: 0.7; }
+    .account-details span { color: var(--header-color); font-weight: 600; }
+    .button-group { display: flex; gap: 10px; margin-top: 15px; }
+    .button-group button { margin-top: 0; }
+    .booking-note { background: rgba(255, 223, 100, 0.15); border: 1px solid rgba(255, 223, 100, 0.3); border-radius: 8px; padding: 15px; margin: 15px 0; text-align: center; font-size: 14px; color: #FFDF64; }
+    .booking-note strong { display: block; margin-bottom: 5px; color: #ffffff; }
+    .table-container { width: 100%; overflow-x: auto; margin-top: 20px; border-radius: 10px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 15px; text-align: left; white-space: nowrap; }
+    thead tr { background-color: var(--input-bg); color: var(--header-color); font-weight: 600; position: sticky; top: 0; z-index: 1; }
+    tbody tr { border-bottom: 1px solid var(--border-color); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background-color: rgba(255, 255, 255, 0.05); }
+    .cancel-btn-small { background: var(--error-color); color: white; padding: 5px 10px; font-size: 12px; border-radius: 5px; margin-top: 0; width: auto; box-shadow: none; background-image: none; }
+    .filter-container { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; background: var(--input-bg); padding: 10px; border-radius: 10px; flex-wrap: wrap; }
+    .filter-container label { margin: 0; color: var(--header-color); }
+    .filter-container input { width: auto; margin-bottom: 0; }
+    .filter-container button { width: auto; margin-top: 0; padding: 8px 16px; }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { background: var(--background-end); padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; border: 1px solid var(--border-color); box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; animation: fadeIn 0.3s ease-in-out; }
+    .modal-content h3 { margin-top: 0; color: #FFDF64; }
+    .modal-content p { margin-bottom: 25px; }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 0;
+        align-items: flex-start; /* Align content to the top on mobile */
+      }
+      .page {
+        padding: 80px 1rem 2rem 1rem; /* Add padding to top/bottom of page to avoid overlap */
+        justify-content: flex-start;
+      }
+      .container {
+        padding: 25px 20px;
+        width: 100%;
+        margin-top: 0;
+      }
+      .logo-container { top: 15px; left: 15px; }
+      .logo-container img { width: 120px; }
+      .page-header { top: 15px; right: 15px; }
+      .home-button { padding: 6px 12px; font-size: 12px; }
+      h2 { font-size: 20px; margin-bottom: 20px; }
+      button { font-size: 15px; }
+      .button-group { flex-direction: column; }
+      .filter-container { flex-direction: column; align-items: stretch; }
+      .filter-container button { margin-top: 10px; }
+      .account-details div { flex-direction: column; align-items: flex-start; gap: 4px;}
+      label { margin-top: 10px; }
+    }
+  </style>
+</head>
+<body>
+  
+  <div id="app-wrapper">
+    <div id="home-page" class="page">
+      <div class="logo-container">
+        <img src="https://kodekiddo.com/wp-content/uploads/2024/06/KodeKiddo-Logo-Officially-Full-200px.png" alt="KodeKiddo Logo" style="border: none;">
+      </div>
+      <div class="container">
+        <h2>Booking Hub</h2>
+        <p style="margin-bottom: 30px;">Please select an option to continue.</p>
+        <button onclick="showPage('booking-page')">Account Booking</button>
+        <button onclick="showPage('bookings-list-page')" style="margin-top: 15px;">View Bookings</button>
+        <button onclick="window.open('https://kodekiddo.com/', '_blank')" style="margin-top: 15px; background-image: none; background-color: var(--input-bg);">Company Website</button>
+        <button onclick="window.open('https://script.google.com/macros/s/AKfycbyQfym5gfFA6DNdAMHA0uYGw2rGI6Ikj9I1IZLuPdNS4fm1oL8zIZReqoNyK-A6iz3McA/exec', '_blank')" style="margin-top: 15px; background-image: none; background-color: var(--input-bg);">Employee Website</button>
+      </div>
+    </div>
+
+    <!-- BOOKING PAGE -->
+    <div id="booking-page" class="page">
+      <div class="logo-container">
+        <a href="https://script.google.com/macros/s/AKfycbyQfym5gfFA6DNdAMHA0uYGw2rGI6Ikj9I1IZLuPdNS4fm1oL8zIZReqoNyK-A6iz3McA/exec?page=app" target="_top">
+          <img src="https://kodekiddo.com/wp-content/uploads/2024/06/KodeKiddo-Logo-Officially-Full-200px.png" alt="KodeKiddo Logo" style="border: none;">
+        </a>
+      </div>
+      <div class="container">
+        <div class="page-header"><button class="home-button" onclick="showPage('home-page')">Home</button></div>
+        <div id="form-wrapper">
+          <h2>Account Booking</h2>
+          <div id="form-section">
+            <label for="booker">Your Name</label>
+            <input type="text" id="booker" placeholder="e.g., John Doe">
+            <label for="branch">Branch</label>
+            <input type="text" id="branch" placeholder="e.g., Main Campus">
+            <label for="date">Date</label>
+            <input type="date" id="date">
+            <label for="slot">Session</label>
+            <select id="slot"></select>
+            <label for="platform">Platform</label>
+            <select id="platform"></select>
+            <label for="account">Account</label>
+            <select id="account"></select>
+            <button id="bookBtn" onclick="book()">Book Now</button>
+          </div>
+        </div>
+        <div id="result" style="display: none;"></div>
+      </div>
+    </div>
+    
+    <!-- BOOKINGS LIST PAGE -->
+    <div id="bookings-list-page" class="page">
+      <div class="container">
+        <div class="page-header"><button class="home-button" onclick="showPage('home-page')">Home</button></div>
+        <h2>Current Bookings</h2>
+        <div class="filter-container">
+          <label for="booking-date-filter">Filter by Date:</label>
+          <input type="date" id="booking-date-filter">
+          <button onclick="loadBookingsList()">Filter</button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Booker</th>
+                <th>Branch</th>
+                <th>Platform</th>
+                <th>Username</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="bookings-tbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRMATION MODAL -->
+  <div id="confirmation-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Important Note</h3>
+      <p id="modal-note-content"></p>
+      <p><strong>Do you want to continue with this booking?</strong></p>
+      <div class="button-group">
+        <button id="modal-cancel-btn" onclick="hideModal()" style="background: var(--input-bg);">Cancel</button>
+        <button id="modal-confirm-btn">Confirm Booking</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        showPage('home-page');
+        loadBookingForm();
+    });
+
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(page => { page.style.display = 'none'; });
+        const pageToShow = document.getElementById(pageId);
+        if (pageToShow) pageToShow.style.display = 'flex';
+
+        if (pageId === 'bookings-list-page') {
+            const today = new Date();
+            const offset = today.getTimezoneOffset();
+            const localDate = new Date(today.getTime() - (offset * 60 * 1000));
+            document.getElementById('booking-date-filter').value = localDate.toISOString().split('T')[0];
+            loadBookingsList();
+        }
+    }
+
+    function loadBookingForm() {
+      const today = new Date();
+      const offset = today.getTimezoneOffset();
+      const localDate = new Date(today.getTime() - (offset * 60 * 1000));
+      const todayString = localDate.toISOString().split('T')[0];
+      const dateInput = document.getElementById('date');
+      dateInput.value = todayString;
+      dateInput.min = todayString;
+      refreshSessions();
+      google.script.run.withSuccessHandler(fillPlatforms).getPlatforms();
+    }
+
+    function refreshSessions() {
+      const d = document.getElementById('date').value;
+      if (!d) return;
+      google.script.run.withSuccessHandler(fillSlots).getSessionsForDate(d);
+    }
+
+    function fillSlots(slots) {
+      const sel = document.getElementById('slot');
+      sel.innerHTML = '';
+      if (slots && slots.length > 0) {
+        slots.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = JSON.stringify(s);
+          opt.textContent = s.label;
+          sel.appendChild(opt);
+        });
+      }
+      document.getElementById('platform').dispatchEvent(new Event('change'));
+    }
+
+    function fillPlatforms(list) {
+      const sel = document.getElementById('platform');
+      sel.innerHTML = '<option value="" disabled selected>Select a Platform</option>';
+      list.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        sel.appendChild(opt);
+      });
+    }
+
+    function fetchAvailableAccounts() {
+      const platform = document.getElementById("platform").value;
+      const date = document.getElementById('date').value;
+      const slotElement = document.getElementById('slot');
+      if (!platform || !date || !slotElement.value) {
+        document.getElementById("account").innerHTML = "<option value='' disabled selected>Select Platform first</option>";
+        return;
+      }
+      google.script.run.withSuccessHandler(function(accounts) {
+        const select = document.getElementById("account");
+        select.innerHTML = "<option value='' disabled selected>Select an Account</option>";
+        if (accounts.length > 0) {
+          accounts.forEach(function(a) {
+            const opt = document.createElement("option");
+            opt.value = a.id;
+            opt.textContent = a.name;
+            if (a.note) opt.dataset.note = a.note;
+            select.appendChild(opt);
+          });
+        } else {
+           select.innerHTML = "<option value='' disabled>No accounts available</option>";
+        }
+      }).getAvailableAccounts(platform, date);
+    }
+
+    function book() {
+      const bookerName = document.getElementById('booker').value;
+      const branch = document.getElementById('branch').value;
+      const platform = document.getElementById('platform').value;
+      const accountId = document.getElementById('account').value;
+      
+      const resultDiv = document.getElementById('result');
+      if (!bookerName || !branch || !platform || !accountId) {
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = 'var(--input-bg)';
+        resultDiv.style.color = 'var(--error-color)';
+        resultDiv.innerText = '❌ Error: Please fill in all fields.';
+        return;
+      }
+      
+      const accountSelect = document.getElementById('account');
+      const selectedOption = accountSelect.options[accountSelect.selectedIndex];
+      const note = selectedOption.dataset.note;
+
+      if (note) {
+        document.getElementById('modal-note-content').innerText = note;
+        document.getElementById('confirmation-modal').style.display = 'flex';
+        document.getElementById('modal-confirm-btn').onclick = executeBooking;
+      } else {
+        executeBooking();
+      }
+    }
+    
+    function hideModal() {
+      document.getElementById('confirmation-modal').style.display = 'none';
+      document.getElementById('modal-confirm-btn').onclick = null;
+    }
+
+    function executeBooking() {
+      hideModal();
+      
+      const bookerName = document.getElementById('booker').value;
+      const branch = document.getElementById('branch').value;
+      const date = document.getElementById('date').value;
+      const platform = document.getElementById('platform').value;
+      const accountId = document.getElementById('account').value;
+      if (!document.getElementById('slot').value) {
+          document.getElementById('result').innerText = '❌ Error: Session data is not loaded.';
+          return;
+      }
+      const slot = JSON.parse(document.getElementById('slot').value);
+      const bookBtn = document.getElementById('bookBtn');
+      const resultDiv = document.getElementById('result');
+      const formWrapper = document.getElementById('form-wrapper');
+
+      bookBtn.disabled = true;
+      formWrapper.style.display = 'none';
+      resultDiv.style.display = 'block';
+      resultDiv.style.background = 'none';
+      resultDiv.style.color = 'var(--text-color)';
+      resultDiv.innerText = 'Booking...';
+
+      google.script.run.withSuccessHandler(res => {
+        bookBtn.disabled = false;
+        if(res.ok){
+          let noteHtml = '';
+          if (res.note) {
+            noteHtml = `<div class="booking-note"><strong>Important Note:</strong><span>${res.note}</span></div>`;
+          }
+          resultDiv.innerHTML = `
+            <div class="success-icon"><svg viewBox="0 0 52 52"><path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg></div>
+            <div class="success-title">Booked Successfully!</div>
+            <div class="account-details">
+              <div><strong>Username:</strong> <span>${res.username}</span></div>
+              <div><strong>Password:</strong> <span>${res.password}</span></div>
+            </div>
+            ${noteHtml}
+            <div class="button-group">
+              <button onclick="cancelBooking('${accountId}', '${date}')" style="background: var(--error-color);">Cancel</button>
+              <button onclick="resetForm()">Book Another</button>
+            </div>`;
+        } else {
+          formWrapper.style.display = 'block';
+          resultDiv.style.background = 'var(--input-bg)';
+          resultDiv.style.color = 'var(--error-color)';
+          resultDiv.innerText = '❌ Error: '+res.error;
+        }
+      }).withFailureHandler(err => {
+        bookBtn.disabled = false;
+        formWrapper.style.display = 'block';
+        resultDiv.style.background = 'var(--input-bg)';
+        resultDiv.style.color = 'var(--error-color)';
+        resultDiv.innerText = '❌ Error: '+err.message;
+      }).bookAccount({
+          bookerName: bookerName, branch: branch, date: date, platform: platform,
+          accountId: accountId, sessionStartISO: slot.startISO, sessionEndISO: slot.endISO
+      });
+    }
+
+    function cancelBooking(accountId, date) {
+      const resultDiv = document.getElementById('result');
+      resultDiv.style.color = 'var(--text-color)';
+      resultDiv.innerText = 'Cancelling...';
+      google.script.run.withSuccessHandler(res => {
+        if (res.ok) {
+          resultDiv.style.color = 'var(--success-color)';
+          resultDiv.innerText = `✅ ${res.message}`;
+          setTimeout(resetForm, 2000);
+        } else {
+          resultDiv.style.color = 'var(--error-color)';
+          resultDiv.innerText = `❌ Error: ${res.error}`;
+        }
+      }).withFailureHandler(err => {
+        resultDiv.style.color = 'var(--error-color)';
+        resultDiv.innerText = `❌ Error: ${err.message}`;
+      }).deleteBooking(accountId, date);
+    }
+
+    function resetForm() {
+      document.getElementById('booker').value = '';
+      document.getElementById('branch').value = '';
+      document.getElementById('platform').innerHTML = '<option value="" disabled selected>Select a Platform</option>';
+      document.getElementById('account').innerHTML = '';
+      document.getElementById('result').innerHTML = '';
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('form-wrapper').style.display = 'block';
+      showPage('booking-page');
+      loadBookingForm();
+    }
+    
+    // --- Bookings List Functions ---
+    function loadBookingsList() {
+        const tbody = document.getElementById('bookings-tbody');
+        const filterDate = document.getElementById('booking-date-filter').value;
+        if (!filterDate) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Please select a date to view bookings.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading bookings...</td></tr>';
+        google.script.run.withSuccessHandler(populateBookingsTable).getBookings(filterDate);
+    }
+    
+    function populateBookingsTable(response) {
+        const tbody = document.getElementById('bookings-tbody');
+        tbody.innerHTML = ''; 
+
+        if (!response.ok) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--error-color);">Error: ${response.error}</td></tr>`;
+            return;
+        }
+
+        if (response.bookings.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No bookings found for this date.</td></tr>';
+            return;
+        }
+
+        response.bookings.forEach(booking => {
+            const row = tbody.insertRow();
+            row.setAttribute('id', `row-${booking.rowNum}`);
+            row.innerHTML = `
+                <td>${booking.date}</td>
+                <td>${booking.booker}</td>
+                <td>${booking.branch}</td>
+                <td>${booking.platform}</td>
+                <td>${booking.username}</td>
+                <td><button class="cancel-btn-small" onclick="cancelBookingFromList(${booking.rowNum})">Cancel</button></td>
+            `;
+        });
+    }
+    
+    function cancelBookingFromList(rowNum) {
+        const row = document.getElementById(`row-${rowNum}`);
+        if (!row) return;
+        
+        const button = row.querySelector('button');
+        
+        showConfirmationModal(`Are you sure you want to cancel the booking for ${row.cells[1].innerText}?`, () => {
+            button.disabled = true;
+            button.innerText = '...';
+
+            google.script.run.withSuccessHandler(res => {
+                if (res.ok) {
+                    row.style.transition = 'opacity 0.5s ease';
+                    row.style.opacity = '0';
+                    setTimeout(() => {
+                        row.remove();
+                        if (document.getElementById('bookings-tbody').rows.length === 0) {
+                            populateBookingsTable({ok: true, bookings: []});
+                        }
+                    }, 500);
+                } else {
+                    showErrorModal('Error: ' + res.error);
+                    button.disabled = false;
+                    button.innerText = 'Cancel';
+                }
+            }).withFailureHandler(err => {
+                showErrorModal('Error: ' + err.message);
+                button.disabled = false;
+                button.innerText = 'Cancel';
+            }).deleteBookingByRow(rowNum);
+        });
+    }
+    
+    function showConfirmationModal(message, onConfirm) {
+      const modal = document.getElementById('confirmation-modal');
+      modal.querySelector('p#modal-note-content').innerText = message;
+      modal.style.display = 'flex';
+      document.getElementById('modal-confirm-btn').onclick = () => {
+        hideModal();
+        onConfirm();
+      };
+    }
+    
+    function showErrorModal(message) {
+      const modal = document.getElementById('confirmation-modal');
+      modal.querySelector('h3').innerText = 'Error';
+      modal.querySelector('p#modal-note-content').innerText = message;
+      modal.style.display = 'flex';
+      document.getElementById('modal-confirm-btn').style.display = 'none';
+      document.getElementById('modal-cancel-btn').innerText = 'Close';
+      document.getElementById('modal-cancel-btn').onclick = () => {
+        hideModal();
+        modal.querySelector('h3').innerText = 'Important Note';
+        document.getElementById('modal-confirm-btn').style.display = 'block';
+         document.getElementById('modal-cancel-btn').innerText = 'Cancel';
+      };
+    }
+
+    document.getElementById('date').addEventListener('change', fetchAvailableAccounts);
+    document.getElementById('platform').addEventListener('change', fetchAvailableAccounts);
+    document.getElementById('slot').addEventListener('change', fetchAvailableAccounts);
+  </script>
+</body>
+</html>
+

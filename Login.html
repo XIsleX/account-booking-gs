@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <title>KodeKiddo Booking Hub - Login</title>
+  <!-- 🔹 Viewport meta tag for responsiveness 🔹 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-color: #8A2BE2; --secondary-color: #4A90E2; --background-start: #1a1a2e;
+      --background-end: #16213e; --container-bg: rgba(255, 255, 255, 0.1);
+      --input-bg: rgba(0, 0, 0, 0.25); --text-color: #e0e0e0; --header-color: #ffffff;
+      --border-color: rgba(255, 255, 255, 0.2); --error-color: #ff4757;
+    }
+    html {
+      box-sizing: border-box;
+      height: 100%;
+    }
+    *, *:before, *:after {
+      box-sizing: inherit;
+    }
+    body {
+      background-image: linear-gradient(45deg, var(--background-start), var(--background-end));
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100%;
+      margin: 0;
+      padding: 1rem;
+    }
+    .container {
+      background: var(--container-bg); padding: 40px; border-radius: 20px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color); width: 100%; max-width: 400px;
+      text-align: center; animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    h2 { margin-bottom: 15px; color: var(--header-color); font-weight: 600; }
+    p { color: #ccc; margin-top: 0; margin-bottom: 25px; font-size: 14px; }
+    input[type="password"] {
+      width: 100%; padding: 12px 15px; border: 1px solid transparent;
+      border-radius: 10px; margin-bottom: 20px; font-size: 14px;
+      background: var(--input-bg); color: var(--text-color); transition: all 0.3s ease;
+    }
+    input[type="password"]:focus {
+      outline: none; border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.3);
+    }
+    button {
+      width: 100%; padding: 12px; border: none; border-radius: 10px;
+      font-size: 16px; font-weight: 600; cursor: pointer;
+      background-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      color: white; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); transition: all 0.3s ease;
+    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); }
+    button:disabled {
+      background-image: none; background-color: #555; cursor: not-allowed;
+      transform: none; box-shadow: none;
+    }
+    .error-message {
+      color: var(--error-color); margin-top: 20px; text-align: center;
+      font-weight: 600; display: none;
+    }
+     @media (max-width: 600px) {
+        .container { padding: 30px 25px; }
+        h2 { font-size: 22px; }
+     }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Enter Password</h2>
+    <p>You need a password to access the booking hub.</p>
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <input type="password" id="password-input" placeholder="Enter password..." required autofocus>
+      <button type="submit" id="submit-btn">Submit</button>
+      <p id="error-message" class="error-message"></p>
+    </form>
+  </div>
+  
+  <script>
+    function handleLogin(event) {
+      event.preventDefault();
+      const passwordInput = document.getElementById('password-input');
+      const submitBtn = document.getElementById('submit-btn');
+      const errorMsg = document.getElementById('error-message');
+      
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Checking...';
+      errorMsg.style.display = 'none';
+
+      google.script.run
+        .withSuccessHandler(response => {
+          if (response.ok) {
+            window.top.location.href = response.url;
+          } else {
+            errorMsg.innerText = response.error;
+            errorMsg.style.display = 'block';
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Submit';
+            passwordInput.focus();
+            passwordInput.select();
+          }
+        })
+        .withFailureHandler(err => {
+          errorMsg.innerText = 'An unexpected error occurred: ' + err.message;
+          errorMsg.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Submit';
+        })
+        .checkPassword(passwordInput.value);
+    }
+  </script>
+</body>
+</html>
+
